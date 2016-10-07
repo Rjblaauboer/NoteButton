@@ -15,26 +15,24 @@
  }
 
  void NoteButton::update()
- {
- 	//Check the associated digital pin
- 	int buttonState = digitalRead( _pin );
- 	bool currentState = _isOn;
- 	if ( buttonState == HIGH ) {
- 		_isOn = true; 
- 	} else {
- 		_isOn = false;
- 	}
+ {	
 
- 	//If the button state is different than the current state
- 	//turn the note on or off depending on the new state
- 	if( currentState != _isOn ){
- 		if( _isOn )
- 		{
- 			noteOn();
- 		} else {
- 			noteOff();
- 		}
- 	} 
+ 	//if enough time has passed since the previous switch to 
+ 	//allow for debouncing
+ 	if( millis() + _debounceDelay > _lastSwitchTime ){
+	 	//Check the associated digital pin
+	 	int currentButtonState = digitalRead( _pin );
+	 	bool previousButtonState = _isOn;
+	 	//Send note on midi event if the button was pressed (LOW->HIGH) 
+	 	if ( previousButtonState == false && currentButtonState == HIGH ) {
+	 		_isOn = true; 
+	 		noteOn();
+	 	} else if( previousButtonState == true && currentButtonState == LOW) {
+	 	//Send note off midi event if the button was pressed (HIGH->LOW) 	
+	 		_isOn = false;
+	 		noteOff();
+	 	}
+	} 
  }
 
  // Sends a Note Off Midi message.
